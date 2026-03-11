@@ -34,25 +34,37 @@ locals {
 # Security group rules
 ######################
 locals {
-  # Add ethertype based on the presence of ':' in remote_ip_prefix
+  # Обработка входящих правил: преобразуем все возможные варианты в унифицированный формат
   processed_ingress_rules = [
-    for r in var.ingress_rules : merge(
-      r,
-      {
-        direction = "ingress",
-        ethertype = lookup(r, "ethertype", can(regex(":", lookup(r, "remote_ip_prefix", ""))) ? "IPv6" : "IPv4")
-      }
-    )
+    for r in var.ingress_rules : {
+      direction               = "ingress",
+      ethertype               = lookup(r, "ethertype", can(regex(":", lookup(r, "remote_ip_prefix", ""))) ? "IPv6" : "IPv4")
+      protocol                = lookup(r, "protocol", null) != "" ? lookup(r, "protocol", null) : ""
+      port_range_min          = try(tonumber(lookup(r, "port", lookup(r, "port_range_min", null))), null)
+      port_range_max          = try(tonumber(lookup(r, "port", lookup(r, "port_range_max", null))), null)
+      description             = lookup(r, "description", null)
+      region                  = lookup(r, "region", null)
+      tenant_id               = lookup(r, "tenant_id", null)
+      remote_address_group_id = lookup(r, "remote_address_group_id", null) != "" ? lookup(r, "remote_address_group_id", null) : null
+      remote_group_id         = lookup(r, "remote_group_id", null) != "" ? lookup(r, "remote_group_id", null) : null
+      remote_ip_prefix        = lookup(r, "remote_ip_prefix", null) != "" ? lookup(r, "remote_ip_prefix", null) : null
+    }
   ]
 
   processed_egress_rules = [
-    for r in var.egress_rules : merge(
-      r,
-      {
-        direction = "egress",
-        ethertype = lookup(r, "ethertype", can(regex(":", lookup(r, "remote_ip_prefix", ""))) ? "IPv6" : "IPv4")
-      }
-    )
+    for r in var.egress_rules : {
+      direction               = "egress",
+      ethertype               = lookup(r, "ethertype", can(regex(":", lookup(r, "remote_ip_prefix", ""))) ? "IPv6" : "IPv4")
+      protocol                = lookup(r, "protocol", null) != "" ? lookup(r, "protocol", null) : ""
+      port_range_min          = try(tonumber(lookup(r, "port", lookup(r, "port_range_min", null))), null)
+      port_range_max          = try(tonumber(lookup(r, "port", lookup(r, "port_range_max", null))), null)
+      description             = lookup(r, "description", null)
+      region                  = lookup(r, "region", null)
+      tenant_id               = lookup(r, "tenant_id", null)
+      remote_address_group_id = lookup(r, "remote_address_group_id", null) != "" ? lookup(r, "remote_address_group_id", null) : null
+      remote_group_id         = lookup(r, "remote_group_id", null) != "" ? lookup(r, "remote_group_id", null) : null
+      remote_ip_prefix        = lookup(r, "remote_ip_prefix", null) != "" ? lookup(r, "remote_ip_prefix", null) : null
+    }
   ]
 
   # Combine all rules
@@ -62,28 +74,27 @@ locals {
 resource "openstack_networking_secgroup_rule_v2" "rules" {
   for_each = var.create ? { for idx, rule in local.rules : idx => rule } : {}
 
-  region            = lookup(each.value, "region", var.region)
-  tenant_id         = lookup(each.value, "tenant_id", var.tenant_id)
+  region            = each.value.region != null ? each.value.region : var.region
+  tenant_id         = each.value.tenant_id != null ? each.value.tenant_id : var.tenant_id
   security_group_id = local.this_sg_id
   direction         = each.value.direction
   ethertype         = each.value.ethertype
-  protocol          = lookup(each.value, "protocol", null)
-  port_range_min    = lookup(each.value, "port", lookup(each.value, "port_range_min", null))
-  port_range_max    = lookup(each.value, "port", lookup(each.value, "port_range_max", null))
-  description       = lookup(each.value, "description", null)
+  protocol          = each.value.protocol
+  port_range_min    = each.value.port_range_min
+  port_range_max    = each.value.port_range_max
+  description       = each.value.description
 
-  remote_address_group_id = lookup(each.value, "remote_address_group_id", null)
+  remote_address_group_id = each.value.remote_address_group_id
 
-  remote_group_id = lookup(each.value, "remote_address_group_id", null) != null ? null : (
-    lookup(each.value, "remote_group_id", null) == "@self"
+  remote_group_id = each.value.remote_address_group_id != null ? null : (
+    each.value.remote_group_id == "@self"
     ? local.this_sg_id
-    : lookup(each.value, "remote_group_id", null)
+    : each.value.remote_group_id
   )
 
   remote_ip_prefix = (
-    lookup(each.value, "remote_address_group_id", null) == null &&
-    lookup(each.value, "remote_group_id", null) == null
-    ? lookup(each.value, "remote_ip_prefix", null)
-    : null
+    each.value.remote_address_group_id != null || each.value.remote_group_id != null
+    ? null
+    : each.value.remote_ip_prefix
   )
 }

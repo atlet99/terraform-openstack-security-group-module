@@ -12,7 +12,7 @@ Terraform module which creates security groups on OpenStack.
 ## Requirements
 
 - `Terraform >= 1.5.0`
-- `Terraform OpenStack Provider ~> 3.0.0`
+- `Terraform OpenStack Provider ~> 3.2.0`
 - `Terraform Random Provider >= 3.6.3`
 
 ## Usage
@@ -21,7 +21,8 @@ Terraform module which creates security groups on OpenStack.
 
 ```hcl
 module "security_group" {
-  source = "github.com/atlet99/openstack-tf-security-group-module?ref=v1.0.0"
+  source  = "atlet99/security-group-module/openstack"
+  version = "1.0.0"
 
   name                 = "my-security-group"
   name_prefix          = "project"
@@ -145,8 +146,8 @@ This is an open source project under the [MIT](https://github.com/atlet99/openst
 | <a name="input_create"></a> [create](#input\_create) | Whether to create security group and all rules | `bool` | `true` | no |
 | <a name="input_delete_default_rules"></a> [delete\_default\_rules](#input\_delete\_default\_rules) | Whether to delete default security group rules | `bool` | `true` | no |
 | <a name="input_description"></a> [description](#input\_description) | Description of security group | `string` | `"Managed by Terraform"` | no |
-| <a name="input_egress_rules"></a> [egress\_rules](#input\_egress\_rules) | List of egress rules. Each rule can define:<br/>- Same structure as `ingress_rules`.<br/><br/>Example:<br/>[<br/>  {<br/>    protocol        = "tcp"<br/>    port            = 22<br/>    remote\_ip\_prefix = "0.0.0.0/0"<br/>    description     = "Allow SSH"<br/>  },<br/>  {<br/>    protocol        = "icmp"<br/>    remote\_ip\_prefix = "::/0"<br/>    description     = "Allow ICMP over IPv6"<br/>  }<br/>] | `list(map(string))` | `[]` | no |
-| <a name="input_ingress_rules"></a> [ingress\_rules](#input\_ingress\_rules) | List of ingress rules. Each rule can define:<br/>- `protocol` (optional): Protocol to allow (e.g., "tcp", "udp", "icmp", "vrrp", etc.).<br/>- `port` or `port_range_min`/`port_range_max` (optional): Single port or range.<br/>- `remote_ip_prefix` (optional): CIDR for allowed source IPs (determines ethertype).<br/>- `remote_group_id` (optional): Security group ID for allowed source. Use "@self" for current group.<br/>- `remote_address_group_id` (optional): OpenStack ID of an address group for allowed source.<br/>- `tenant_id` (optional): The owner of the rule.<br/>- `description` (optional): Description of the rule.<br/><br/>Example:<br/>[<br/>  {<br/>    protocol        = "tcp"<br/>    port            = 22<br/>    remote\_ip\_prefix = "0.0.0.0/0"<br/>    description     = "Allow SSH"<br/>  },<br/>  {<br/>    protocol        = "icmp"<br/>    remote\_ip\_prefix = "::/0"<br/>    description     = "Allow ICMP over IPv6"<br/>  }<br/>] | `list(map(string))` | `[]` | no |
+| <a name="input_egress_rules"></a> [egress\_rules](#input\_egress\_rules) | List of egress rules. Each rule can define:<br/>- Same structure as `ingress_rules`.<br/><br/>Example:<br/>[<br/>  {<br/>    protocol        = "tcp"<br/>    port            = 22<br/>    remote\_ip\_prefix = "0.0.0.0/0"<br/>    description     = "Allow SSH"<br/>  },<br/>  {<br/>    protocol        = "icmp"<br/>    remote\_ip\_prefix = "::/0"<br/>    description     = "Allow ICMP over IPv6"<br/>  }<br/>] | `any` | `[]` | no |
+| <a name="input_ingress_rules"></a> [ingress\_rules](#input\_ingress\_rules) | List of ingress rules. Each rule can define:<br/>- `protocol` (optional): Protocol to allow (e.g., "tcp", "udp", "icmp", "vrrp", etc.).<br/>- `port` or `port_range_min`/`port_range_max` (optional): Single port or range.<br/>- `remote_ip_prefix` (optional): CIDR for allowed source IPs (determines ethertype).<br/>- `remote_group_id` (optional): Security group ID for allowed source. Use "@self" for current group.<br/>- `remote_address_group_id` (optional): OpenStack ID of an address group for allowed source.<br/>- `tenant_id` (optional): The owner of the rule.<br/>- `description` (optional): Description of the rule.<br/><br/>Example:<br/>[<br/>  {<br/>    protocol        = "tcp"<br/>    port            = 22<br/>    remote\_ip\_prefix = "0.0.0.0/0"<br/>    description     = "Allow SSH"<br/>  },<br/>  {<br/>    protocol        = "icmp"<br/>    remote\_ip\_prefix = "::/0"<br/>    description     = "Allow ICMP over IPv6"<br/>  }<br/>] | `any` | `[]` | no |
 | <a name="input_name"></a> [name](#input\_name) | Name of security group | `string` | n/a | yes |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix of security group | `string` | `""` | no |
 | <a name="input_region"></a> [region](#input\_region) | Region where the security group is located | `string` | `null` | no |
@@ -160,7 +161,9 @@ This is an open source project under the [MIT](https://github.com/atlet99/openst
 | Name | Description |
 |------|-------------|
 | <a name="output_security_group_all_tags"></a> [security\_group\_all\_tags](#output\_security\_group\_all\_tags) | The collection of tags assigned on the security group, which have been explicitly and implicitly added |
+| <a name="output_security_group_description"></a> [security\_group\_description](#output\_security\_group\_description) | The description of the security group |
 | <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The ID of the security group |
 | <a name="output_security_group_name"></a> [security\_group\_name](#output\_security\_group\_name) | The name of the security group |
+| <a name="output_security_group_rules"></a> [security\_group\_rules](#output\_security\_group\_rules) | The list of security group rules created in the security group |
 | <a name="output_security_group_tenant_id"></a> [security\_group\_tenant\_id](#output\_security\_group\_tenant\_id) | The tenant ID of the security group |
 <!-- END_TF_DOCS -->

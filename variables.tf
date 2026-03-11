@@ -89,7 +89,7 @@ Example:
   }
 ]
 EOT
-  type        = list(map(string))
+  type        = any
   default     = []
 }
 
@@ -116,7 +116,7 @@ Example:
   }
 ]
 EOT
-  type        = list(map(string))
+  type        = any
   default     = []
 }
 

@@ -8,6 +8,11 @@ output "security_group_name" {
   value       = try(values(openstack_networking_secgroup_v2.this)[0].name, "")
 }
 
+output "security_group_description" {
+  description = "The description of the security group"
+  value       = try(values(openstack_networking_secgroup_v2.this)[0].description, "")
+}
+
 output "security_group_tenant_id" {
   description = "The tenant ID of the security group"
   value       = try(values(openstack_networking_secgroup_v2.this)[0].tenant_id, "")
@@ -16,4 +21,9 @@ output "security_group_tenant_id" {
 output "security_group_all_tags" {
   description = "The collection of tags assigned on the security group, which have been explicitly and implicitly added"
   value       = try(values(openstack_networking_secgroup_v2.this)[0].all_tags, [])
+}
+
+output "security_group_rules" {
+  description = "The list of security group rules created in the security group"
+  value       = openstack_networking_secgroup_rule_v2.rules
 }
