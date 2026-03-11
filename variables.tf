@@ -51,7 +51,13 @@ variable "stateful" {
 variable "region" {
   description = "Region where the security group is located"
   type        = string
-  default     = ""
+  default     = null
+}
+
+variable "tenant_id" {
+  description = "The owner of the security group. Required if admin wants to create a security group for another tenant."
+  type        = string
+  default     = null
 }
 
 ##########
@@ -60,10 +66,12 @@ variable "region" {
 variable "ingress_rules" {
   description = <<EOT
 List of ingress rules. Each rule can define:
-- `protocol` (optional): Protocol to allow (e.g., "tcp", "udp", "icmp").
+- `protocol` (optional): Protocol to allow (e.g., "tcp", "udp", "icmp", "vrrp", etc.).
 - `port` or `port_range_min`/`port_range_max` (optional): Single port or range.
 - `remote_ip_prefix` (optional): CIDR for allowed source IPs (determines ethertype).
-- `remote_group_id` (optional): Security group ID for allowed source.
+- `remote_group_id` (optional): Security group ID for allowed source. Use "@self" for current group.
+- `remote_address_group_id` (optional): OpenStack ID of an address group for allowed source.
+- `tenant_id` (optional): The owner of the rule.
 - `description` (optional): Description of the rule.
 
 Example:

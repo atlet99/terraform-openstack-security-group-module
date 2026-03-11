@@ -113,3 +113,54 @@ output "security_group_name" {
 ## License
 
 This is an open source project under the [MIT](https://github.com/atlet99/openstack-tf-security-group-module/blob/master/LICENSE) license.
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
+| <a name="requirement_openstack"></a> [openstack](#requirement\_openstack) | ~> 3.2.0 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.6.3 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_openstack"></a> [openstack](#provider\_openstack) | 3.2.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.8.1 |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [openstack_networking_secgroup_rule_v2.rules](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/networking_secgroup_rule_v2) | resource |
+| [openstack_networking_secgroup_v2.this](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/networking_secgroup_v2) | resource |
+| [random_id.this](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_create"></a> [create](#input\_create) | Whether to create security group and all rules | `bool` | `true` | no |
+| <a name="input_delete_default_rules"></a> [delete\_default\_rules](#input\_delete\_default\_rules) | Whether to delete default security group rules | `bool` | `true` | no |
+| <a name="input_description"></a> [description](#input\_description) | Description of security group | `string` | `"Managed by Terraform"` | no |
+| <a name="input_egress_rules"></a> [egress\_rules](#input\_egress\_rules) | List of egress rules. Each rule can define:<br/>- Same structure as `ingress_rules`.<br/><br/>Example:<br/>[<br/>  {<br/>    protocol        = "tcp"<br/>    port            = 22<br/>    remote\_ip\_prefix = "0.0.0.0/0"<br/>    description     = "Allow SSH"<br/>  },<br/>  {<br/>    protocol        = "icmp"<br/>    remote\_ip\_prefix = "::/0"<br/>    description     = "Allow ICMP over IPv6"<br/>  }<br/>] | `list(map(string))` | `[]` | no |
+| <a name="input_ingress_rules"></a> [ingress\_rules](#input\_ingress\_rules) | List of ingress rules. Each rule can define:<br/>- `protocol` (optional): Protocol to allow (e.g., "tcp", "udp", "icmp", "vrrp", etc.).<br/>- `port` or `port_range_min`/`port_range_max` (optional): Single port or range.<br/>- `remote_ip_prefix` (optional): CIDR for allowed source IPs (determines ethertype).<br/>- `remote_group_id` (optional): Security group ID for allowed source. Use "@self" for current group.<br/>- `remote_address_group_id` (optional): OpenStack ID of an address group for allowed source.<br/>- `tenant_id` (optional): The owner of the rule.<br/>- `description` (optional): Description of the rule.<br/><br/>Example:<br/>[<br/>  {<br/>    protocol        = "tcp"<br/>    port            = 22<br/>    remote\_ip\_prefix = "0.0.0.0/0"<br/>    description     = "Allow SSH"<br/>  },<br/>  {<br/>    protocol        = "icmp"<br/>    remote\_ip\_prefix = "::/0"<br/>    description     = "Allow ICMP over IPv6"<br/>  }<br/>] | `list(map(string))` | `[]` | no |
+| <a name="input_name"></a> [name](#input\_name) | Name of security group | `string` | n/a | yes |
+| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix of security group | `string` | `""` | no |
+| <a name="input_region"></a> [region](#input\_region) | Region where the security group is located | `string` | `null` | no |
+| <a name="input_stateful"></a> [stateful](#input\_stateful) | Indicates if the security group is stateful or stateless | `bool` | `true` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | A set of string tags to assign to security group | `set(string)` | `[]` | no |
+| <a name="input_tenant_id"></a> [tenant\_id](#input\_tenant\_id) | The owner of the security group. Required if admin wants to create a security group for another tenant. | `string` | `null` | no |
+| <a name="input_use_name_prefix"></a> [use\_name\_prefix](#input\_use\_name\_prefix) | Whether to use name\_prefix before name or not | `bool` | `false` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_security_group_all_tags"></a> [security\_group\_all\_tags](#output\_security\_group\_all\_tags) | The collection of tags assigned on the security group, which have been explicitly and implicitly added |
+| <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The ID of the security group |
+| <a name="output_security_group_name"></a> [security\_group\_name](#output\_security\_group\_name) | The name of the security group |
+| <a name="output_security_group_tenant_id"></a> [security\_group\_tenant\_id](#output\_security\_group\_tenant\_id) | The tenant ID of the security group |
+<!-- END_TF_DOCS -->

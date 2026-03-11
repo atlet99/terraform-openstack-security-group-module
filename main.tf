@@ -9,10 +9,12 @@ resource "random_id" "this" {
 # Create Security Group
 ##################################
 resource "openstack_networking_secgroup_v2" "this" {
-  for_each = var.create && false == var.use_name_prefix ? { "id" = 1 } : {}
+  for_each = var.create ? { "id" = 1 } : {}
 
   name        = local.this_sg_name
   description = var.description
+  region      = var.region
+  tenant_id   = var.tenant_id
 
   tags                 = var.tags
   delete_default_rules = var.delete_default_rules
@@ -38,7 +40,7 @@ locals {
       r,
       {
         direction = "ingress",
-        ethertype = can(regex(":", lookup(r, "remote_ip_prefix", ""))) ? "IPv6" : "IPv4"
+        ethertype = lookup(r, "ethertype", can(regex(":", lookup(r, "remote_ip_prefix", ""))) ? "IPv6" : "IPv4")
       }
     )
   ]
@@ -48,7 +50,7 @@ locals {
       r,
       {
         direction = "egress",
-        ethertype = can(regex(":", lookup(r, "remote_ip_prefix", ""))) ? "IPv6" : "IPv4"
+        ethertype = lookup(r, "ethertype", can(regex(":", lookup(r, "remote_ip_prefix", ""))) ? "IPv6" : "IPv4")
       }
     )
   ]
@@ -60,28 +62,28 @@ locals {
 resource "openstack_networking_secgroup_rule_v2" "rules" {
   for_each = var.create ? { for idx, rule in local.rules : idx => rule } : {}
 
-  region            = var.region == null ? null : var.region
+  region            = lookup(each.value, "region", var.region)
+  tenant_id         = lookup(each.value, "tenant_id", var.tenant_id)
   security_group_id = local.this_sg_id
   direction         = each.value.direction
   ethertype         = each.value.ethertype
   protocol          = lookup(each.value, "protocol", null)
   port_range_min    = lookup(each.value, "port", lookup(each.value, "port_range_min", null))
   port_range_max    = lookup(each.value, "port", lookup(each.value, "port_range_max", null))
-  description       = each.value.description
+  description       = lookup(each.value, "description", null)
 
-  # Set remote_ip_prefix only if it is provided and remote_group_id is null
-  remote_ip_prefix = lookup(each.value, "remote_ip_prefix", null) != null && lookup(each.value, "remote_group_id", null) == null ? each.value.remote_ip_prefix : null
+  remote_address_group_id = lookup(each.value, "remote_address_group_id", null)
 
-  # If "remote_group_id" is set to "@self", use the current security group ID (local.this_sg_id).
-  # If "remote_group_id" is not null and "remote_ip_prefix" is null, use the value of "remote_group_id".
-  # Otherwise, set the value to null.
-  remote_group_id = (
+  remote_group_id = lookup(each.value, "remote_address_group_id", null) != null ? null : (
     lookup(each.value, "remote_group_id", null) == "@self"
     ? local.this_sg_id
-    : (
-      lookup(each.value, "remote_group_id", null) != null && lookup(each.value, "remote_ip_prefix", null) == null
-      ? lookup(each.value, "remote_group_id", null)
-      : null
-    )
+    : lookup(each.value, "remote_group_id", null)
+  )
+
+  remote_ip_prefix = (
+    lookup(each.value, "remote_address_group_id", null) == null &&
+    lookup(each.value, "remote_group_id", null) == null
+    ? lookup(each.value, "remote_ip_prefix", null)
+    : null
   )
 }
