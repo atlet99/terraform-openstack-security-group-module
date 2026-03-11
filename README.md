@@ -22,7 +22,7 @@ Terraform module which creates security groups on OpenStack.
 ```hcl
 module "security_group" {
   source  = "atlet99/security-group-module/openstack"
-  version = "1.0.0"
+  version = "1.0.1"
 
   name                 = "my-security-group"
   name_prefix          = "project"
